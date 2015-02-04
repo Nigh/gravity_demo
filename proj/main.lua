@@ -8,6 +8,8 @@ function love.load()
   moon=g:createObj(rand(250,350),rand(250,350),10,5)
   moon2=g:createObj(rand(250,350),rand(250,350),20,15)
   earth2=g:createObj(rand(100,200),rand(250,350),50,25)
+
+  center=earth
   m.attachSpeed(earth,20,10)
   m.attachSpeed(moon,40,0)
   m.attachSpeed(moon2,5,30)
@@ -35,10 +37,16 @@ function love.update(dt)
 	m.move(moon2,deltaT)
 end
 
+
 function love.draw()
-	_1,_2=earth:getA_Global()
   -- love.graphics.printf(moon:getMass(),1,0,1)
+	_1,_2=earth:getA_Global()
 	love.graphics.printf(_1.."\n".._2 .. " ",1,0,1)
+
+
+	love.graphics.push()
+
+	love.graphics.translate(-center.x+400, -center.y+300)
 
 	love.graphics.setColor(155, 255, 120, 255)
 	love.graphics.circle( "fill", earth.x, earth.y,earth.r,66)
@@ -48,6 +56,8 @@ function love.draw()
 	love.graphics.circle( "fill", moon.x, moon.y,moon.r,33)
 	love.graphics.setColor(rand(100,255), rand(100,255), rand(100,255), 255)
 	love.graphics.circle( "fill", moon2.x, moon2.y,moon2.r,33)
+
+	love.graphics.pop()
 end
 
 function love.keypressed(key)
@@ -79,7 +89,8 @@ function love.keypressed(key)
 		earth2.x=earth2.x-50
 	end
 	if key == "r" then
-		-- love.load()
+		center=g.objList[center.index+1]
+		if not center then center=g.objList[1] end
 	end
 
 end

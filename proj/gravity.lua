@@ -3,6 +3,8 @@ gravity={}
 _ENV=gravity
 objList={}
 
+gravity.objList=objList
+
 G=1000
 scale=0.9
 
