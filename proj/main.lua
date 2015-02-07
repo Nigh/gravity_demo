@@ -153,11 +153,12 @@ end
 function preSolve(a, b, coll)
 	text="preSolve".."\n"..string.sub(text,1,800)
 end
-function postSolve(a, b, coll)
-	nx, ny = coll:getNormal()
+
+function postSolve(fixture1, fixture2, contact)
+	nx, ny = contact:getNormal()
 	text="postSolve:"..nx..","..ny.."\n"..string.sub(text,1,800)
-	ia=a:getUserData()
-	ib=b:getUserData()
+	ia=fixture1:getUserData()
+	ib=fixture2:getUserData()
 	-- print(ia)
 	-- print(ib)
 	-- for i=1,#phyObj do
