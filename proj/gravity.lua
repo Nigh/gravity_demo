@@ -6,39 +6,37 @@ objList={}
 gravity.objList=objList
 
 G=1000
-scale=0.9
+scale=0.5
 
-function gravity:createObj( x,y,mass,radius,o )
-	o=o or {x=x,y=y,mass=mass,r=radius}
-	_G.setmetatable(o, self)
-	self.__index = self
-	o.index=#objList+1
+function gravity.attachPhyObj(o,mass)
 	objList[#objList+1]=o
-	return o
+	o.setMass=o.body.setMass
+	if mass~=nil then
+		o.setMass(mass)
+	end
+	o.getG_Between=getG_Between
+	o.getG_Global=getG_Global
+	o.getA_Global=getA_Global
 end
 
-function gravity:getMass()
-	return self.mass
-end
-
-function gravity:getG_Between(Obj_B)
+function getG_Between( self,Obj_B )
 	-- 输出以 self 为观察者的引力向量
-	local dist=math.dist(self.x,self.y,Obj_B.x,Obj_B.y)
-	local _x,_y=direction(self.x,self.y,Obj_B.x,Obj_B.y)
+	local dist=math.dist(self.body:getX(),self.body:getY(),Obj_B.body:getX(),Obj_B.body:getY())
+	local _x,_y=direction(self.body:getX(),self.body:getY(),Obj_B.body:getX(),Obj_B.body:getY())
 	local dist2
-	if(dist>self.r+Obj_B.r-1) then	--重叠时，按照接触距离计算引力
+	if(dist>self.shape:getRadius()+Obj_B.shape:getRadius()-1) then	--重叠时，按照接触距离计算引力
 		dist2=((scale*dist)^2)
 	else
-		dist2=((scale*(self.r+Obj_B.r))^2)
+		dist2=((scale*(self.shape:getRadius()+Obj_B.shape:getRadius()))^2)
 	end
-	local force=G*self:getMass()*Obj_B:getMass()/dist2
+	local force=G*self.body:getMass()*Obj_B.body:getMass()/dist2
 	return _x*force,_y*force
 end
 
-function gravity:getG_Global()
+function getG_Global( self )
 	local forceX,forceY=0,0
 	for i=1,#objList do
-		if(i~=self.index) then
+		if(objList[i]~=self) then
 			_x,_y=self:getG_Between(objList[i])
 			forceX=forceX+_x
 			forceY=forceY+_y
@@ -47,9 +45,9 @@ function gravity:getG_Global()
 	return forceX,forceY
 end
 
-function gravity:getA_Global()
+function getA_Global(self)
 	local _x,_y=self:getG_Global()
-	return _x/self:getMass(),_y/self:getMass()
+	return _x/self.body:getMass(),_y/self.body:getMass()
 end
 
 function math.dist(x1,y1,x2,y2)--求2点距离
