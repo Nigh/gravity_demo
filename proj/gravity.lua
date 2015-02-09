@@ -5,8 +5,8 @@ objList={}
 
 gravity.objList=objList
 
-G=1000
-scale=0.5
+G=60000
+scale=0.1
 
 function gravity.attachPhyObj(o,mass)
 	objList[#objList+1]=o
@@ -17,6 +17,40 @@ function gravity.attachPhyObj(o,mass)
 	o.getG_Between=getG_Between
 	o.getG_Global=getG_Global
 	o.getA_Global=getA_Global
+	o.draw=obj_drawSelf
+	o.drawGravity=obj_drawGravity
+	o.drawVelocity=obj_drawVelocity
+end
+
+function obj_drawSelf( self )
+	_G.love.graphics.circle( "fill", 
+	self.body:getX(), 
+	self.body:getY(),
+	self.shape:getRadius(),
+	self.shape:getRadius()*6)
+end
+
+function obj_drawVelocity( self )
+	r=self.shape:getRadius()
+	gx,gy=self.body:getLinearVelocity()
+	k=r/math.dist(gx,gy,0,0)
+	_G.love.graphics.setColor(255, 255, 0, 100)
+	_G.love.graphics.line(
+	self.body:getX()+gx*k, 
+	self.body:getY()+gy*k,
+	self.body:getX()+gx*(1+k), 
+	self.body:getY()+gy*(1+k))
+end
+function obj_drawGravity( self )
+	r=self.shape:getRadius()
+	gx,gy=self:getA_Global()
+	k=r/math.dist(gx,gy,0,0)
+	_G.love.graphics.setColor(255, 255, 255, 100)
+	_G.love.graphics.line(
+	self.body:getX()+gx*k, 
+	self.body:getY()+gy*k,
+	self.body:getX()+gx*(1+k), 
+	self.body:getY()+gy*(1+k))
 end
 
 function getG_Between( self,Obj_B )
@@ -48,6 +82,12 @@ end
 function getA_Global(self)
 	local _x,_y=self:getG_Global()
 	return _x/self.body:getMass(),_y/self.body:getMass()
+end
+
+function gravity:update( ... )
+	for i,v in ipairs(objList) do
+		v.body:applyForce(v:getG_Global())
+	end
 end
 
 function math.dist(x1,y1,x2,y2)--求2点距离
